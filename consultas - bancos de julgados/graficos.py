@@ -71,7 +71,7 @@ for k, v in tbl_01['UBER'].items():
         total_uber += int(v)
 
 total_99 = 0 
-for k, v in tbl_01['99 TAXIS'].items():
+for k, v in tbl_01.iloc[:, 2 ].items():
     if v != '':
         total_99 += int(v)
 
@@ -276,13 +276,18 @@ tbl_01['TOTAL P/ TRT'] = soma_por_linha
 
 print(tbl_01)
 
-#df_trans.to_csv('tabela_02_ceat.csv')
-#writer = pd.ExcelWriter('tabela_02_ceat.xlsx')
-#df_trans.to_excel(writer)
+df_trans.to_csv('tabela_02_processos.csv')
+writer = pd.ExcelWriter('tabela_02_processos.xlsx')
+df_trans.to_excel(writer)
 # save the excel
-#writer.save()
-#print('DataFrame is written successfully to Excel File.')
+writer.save()
+print('DataFrame is written successfully to Excel File.')
 
+tbl_01.to_csv('tabela_01_processos.csv')
+writer = pd.ExcelWriter('tabela_01_processos.xlsx')
+tbl_01.to_excel(writer)
+writer.save()
+print('DataFrame is written successfully to Excel File.')
 
 import plotly.express as px
 df = tbl_01.iloc[:24, :]
@@ -294,10 +299,11 @@ df = tbl_01.iloc[:24, :]
 #fig.show()
 
 fig = px.bar(df, x='', y='TOTAL P/ TRT',
-            hover_data=['UBER', '99 TAXIS', 'IFOOD', 'LOGGI', 'RAPPI'], color='TOTAL P/ TRT',
+            #hover_data=['UBER', 'TAXIS99', 'IFOOD', 'LOGGI', 'RAPPI'], 
+            color='TOTAL P/ TRT',
             #labels={'pop':'population of Canada'}, 
             height=400)
-#fig.show()
+fig.show()
 
 
 import os
@@ -310,11 +316,11 @@ scope = PlotlyScope(
 )
 
 #==== SALVAR IMAGEM COM ESTE CÓDIGO - QUANDO FOR SALVAR, TIRAR O COMENTÁRIO DO CÓDIGO
-#with open("figure.jpg", "wb") as f:
-    #f.write(scope.transform(fig, format="jpg"))
+with open("figure.jpg", "wb") as f:
+    f.write(scope.transform(fig, format="jpg"))
 
 
-#fig.write_html("grafico_01.html")
+fig.write_html("grafico_01.html")
 
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -325,30 +331,23 @@ from plotly.subplots import make_subplots
 fig = make_subplots(rows=1, cols=2, specs=[[{'type':'domain'}, {'type':'domain'}]])
 fig.add_trace(go.Pie(labels=df[''], values=df['UBER'], name="UBER"),
             1, 1)
-fig.add_trace(go.Pie(labels=df[''], values=df['99 TAXIS'], name="99.TAXIS"),
+fig.add_trace(go.Pie(labels=df[''], values=df.iloc[:, 3], name="TAXIS99"),
             1, 2)
 
 # Use `hole` to create a donut-like pie chart
 fig.update_traces(hole=.4, hoverinfo="label+percent+name")
 
 fig.update_layout(
-    title_text="Porcentagens - CEAT",
+    title_text="Porcentagens - Processos",
     # Add annotations in the center of the donut pies.
     annotations=[dict(text='UBER', x= 0.2, y=0.5, font_size=20, showarrow=False),
-                dict(text='99 TAXIS', x=0.81, y=0.5, font_size=20, showarrow=False)])
-#fig.show()
+                dict(text='TAXIS99', x=0.81, y=0.5, font_size=20, showarrow=False)])
+fig.show()
 
 
-#fig.write_html("grafico_02.html")
+fig.write_html("grafico_02.html")
 
-fig = px.bar(
-    tbl_01,
-    x='', 
-    y=["UBER","99 TAXIS"],
-    title="Empresas no Ramo de Transporte",
-    barmode="group",
-    labels={"value": "TRTs"},
-)
+
 #fig.show()
 
 
@@ -373,19 +372,19 @@ fig.add_trace(go.Bar(
 ))
 fig.add_trace(go.Bar(
     x=trts,
-    y=tbl_01['99 TAXIS'],
-    name='99 Taxis',
+    y=tbl_01.iloc[:, 3],
+    name='Taxis99',
     marker_color='lightsalmon'
     
 ))
 
 # Here we modify the tickangle of the xaxis, resulting in rotated labels.
 fig.update_layout(barmode='group', xaxis_tickangle=-45)
-#fig.show()
-#fig.write_html("grafico_ceat_transporte.html")
+fig.show()
+fig.write_html("grafico_transporte.html")
 
-#with open("ceat_uber-99.jpg", "wb") as f:
-    #f.write(scope.transform(fig, format="jpg"))
+with open("processos_uber-99.jpg", "wb") as f:
+    f.write(scope.transform(fig, format="jpg"))
 
 print(df_trans)
 
@@ -402,27 +401,5 @@ plt.show()
 
 
 
-import docx
-import pandas as pd
-
-# i am not sure how you are getting your data, but you said it is a
-# pandas data frame
-df = tbl_01
-
-# open an existing document
-doc = docx.Document('./test.docx')
-
-# add a table to the end and create a reference variable
-# extra row is so we can add the header row
-t = doc.add_table(df.shape[0]+1, df.shape[1])
-
-# add the header rows.
-for j in range(df.shape[-1]):
-    t.cell(0,j).text = df.columns[j]
-
-# add the rest of the data frame
-for i in range(df.shape[0]):
-    for j in range(df.shape[-1]):
-        t.cell(i+1,j).text = str(df.values[i,j])
 
 
